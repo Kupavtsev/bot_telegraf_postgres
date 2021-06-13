@@ -1,23 +1,22 @@
 module.exports = {
 
-    gameOptions: {
+    priceOptions : {
         reply_markup: JSON.stringify({
             inline_keyboard: [                          // Каждый вложенный массив это отдельная строка
                                                         // callback_data: Информация, которая вернется на Сервер 
                                                         // при нажатии этой кнопки
-                [{text: '1', callback_data: '1'}, {text: '2', callback_data: '2'}, {text: '3', callback_data: '3'}],      
-                [{text: '4', callback_data: '4'}, {text: '5', callback_data: '5'}, {text: '6', callback_data: '6'}],      
-                [{text: '7', callback_data: '7'}, {text: '8', callback_data: '8'}, {text: '9', callback_data: '9'}],
-                [{text: '0', callback_data: '0'}]
+                [{text: '100', callback_data: '100'}, {text: '200', callback_data: '200'}, {text: '300', callback_data: '300'}],      
+                [{text: '400', callback_data: '400'}, {text: '500', callback_data: '500'}, {text: '600', callback_data: '600'}]      
             ]                                                           
         })
     },
     
-    againOptions: {
+    hotPriceOptions : {
         reply_markup: JSON.stringify({
             inline_keyboard: [
-                [{text: 'Играть еще раз', callback_data: '/again'}]
+                [{text: 'Указать горячую цену?', callback_data: '/hotPrice'}]
             ]                                                           
         })
     }
+
 }

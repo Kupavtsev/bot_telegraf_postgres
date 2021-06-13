@@ -1,43 +1,21 @@
 const TelegramApi = require('node-telegram-bot-api')
-// const {gameOptions, againOptions} = require('/options')
+const {priceOptions, hotPriceOptions } = require('./options')
 
 const sequelize = require('./db')
-const UserModel = require('./model')
+// const UserModel = require('./model')
+const PriceModel = require('./model')
 
 const token = '1835665140:AAGps0TPKOKDNOcj_U9tz3TFdaj6UI-7TDU'
 
 const bot = new TelegramApi(token, {polling: true})
 
 
-const chats = {}
-
-const gameOptions = {
-    reply_markup: JSON.stringify({
-        inline_keyboard: [                          // Каждый вложенный массив это отдельная строка
-                                                    // callback_data: Информация, которая вернется на Сервер 
-                                                    // при нажатии этой кнопки
-            [{text: '1', callback_data: '1'}, {text: '2', callback_data: '2'}, {text: '3', callback_data: '3'}],      
-            [{text: '4', callback_data: '4'}, {text: '5', callback_data: '5'}, {text: '6', callback_data: '6'}],      
-            [{text: '7', callback_data: '7'}, {text: '8', callback_data: '8'}, {text: '9', callback_data: '9'}],
-            [{text: '0', callback_data: '0'}]
-        ]                                                           
-    })
+const choosePrice = async (chatId) => {
+    await bot.sendMessage(chatId, 'Укажите цену:', priceOptions)
 }
 
-const againOptions = {
-    reply_markup: JSON.stringify({
-        inline_keyboard: [
-            [{text: 'Играть еще раз', callback_data: '/again'}]
-        ]                                                           
-    })
-}
-
-
-const startGame = async (chatId) => {
-    await bot.sendMessage(chatId, 'Я загадал цифру от 0 до 9, угадай какую!')
-    const randomNumber = Math.floor(Math.random() * 10)
-    chats[chatId] = randomNumber;   // По ключу добавляем сгенерированное число
-    await bot.sendMessage(chatId, 'Отгадывай!', gameOptions)
+function isEmpty(obj) {
+    return Object.keys(obj).length === 0;
 }
 
 
@@ -52,29 +30,31 @@ const start = async () => {
 
     bot.setMyCommands( [
         {command: '/start', description: 'начальное приветсиве'},
-        {command: '/info', description: 'получить информацию о пользователе'},
-        {command: '/game', description: 'игра - угадай число'}
     ])
     
     bot.on('message', async msg=> {
         const text = msg.text;
         const chatId = msg.chat.id;
+        const user = await PriceModel.findOne({chatId})
+        // console.log(isEmpty(user));
 
         try {
             if (text === '/start') {
 
-                await UserModel.create({chatId})        // Делаем заптсь в БД по id
+                // if (isEmpty(user)) {
+                //     await PriceModel.create({chatId}) 
+                // }
+                await PriceModel.create({chatId})
 
-                await bot.sendSticker(chatId, 'https://cdn.tlgrm.ru/stickers/ea5/382/ea53826d-c192-376a-b766-e5abc535f1c9/192/1.webp')
-                return bot.sendMessage(chatId, `Добро пожаловать, почем железо ?`);
+                return bot.sendMessage(chatId, `Добро пожаловать, напишите ваше объявление: `);
             }
-            if (text === '/info') {
-                const user = await UserModel.findOne({chatId})      // Получаем запись, которая произошла при /start
-                return bot.sendMessage(chatId, `Тебя зовут ${msg.from.first_name}, в игре у тебя правильных ответов ${user.right}, неправильных ${user.wrong}`);
+            if (text) {
+                user.ad = text;
+                await user.save();
+                console.log(text);
+                return choosePrice(chatId);
             }
-            if (text === '/game') {
-               return startGame(chatId);
-            }
+            
             return bot.sendMessage(chatId, 'Я тебе не понимаю, напиши по другому...')
         } catch (e) {
             return bot.sendMessage(chatId, 'Произошла какая-то ошибка');
@@ -85,20 +65,18 @@ const start = async () => {
         const data = msg.data;
         const chatId = msg.message.chat.id;
 
-        if (data === '/again') {
-            return startGame(chatId);
+        if (data === '/hotPrice') {
+            return choosePrice(chatId);
         }
 
-        const user = await UserModel.findOne({chatId})      // we user to increase our answers in DB
+        const user = await PriceModel.findOne({chatId})
 
-        if (data == chats[chatId]) {
-            user.right += 1;
-            await bot.sendMessage(chatId, `Угадал! ${chats[chatId]}`, againOptions);
-        } else {
-            user.wrong += 1;
-            await bot.sendMessage(chatId, `Не верно! Бот загодал ${chats[chatId]}`, againOptions);
+        if (data) {
+            user.price = data;
+            await user.save();
+            await bot.sendMessage(chatId, `Добавлено! ${data}`, hotPriceOptions);
+            return bot.sendMessage(chatId, 'объявление будет закреплено, пока иной пользователь не даст горячую цену')
         }
-        await user.save();
     })
 }
 
