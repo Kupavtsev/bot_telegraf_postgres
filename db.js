@@ -1,9 +1,9 @@
 const {Sequelize} = require('sequelize');
 
 module.exports = new Sequelize(
-    'mydb',
-    'postgres',
-    '32167',
+    'mydb',         // Base name
+    'postgres',     // User name
+    '32167',     // password
     {
         host: 'localhost',
         // port: '7348',

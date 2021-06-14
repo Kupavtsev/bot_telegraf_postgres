@@ -44,10 +44,9 @@ app.put("/ads/:id", async (req, res) => {
       const { id } = req.params;
       const { ad } = req.body;
       const { price } = req.body;
-      const { hot } = req.body;
       const updateAd = await pool.query(
-        "UPDATE prices SET ad = $1, price = $2, hot = $3 WHERE id = $4",
-        [ad, price, hot, id]
+        "UPDATE prices SET ad = $1, price = $2 WHERE id = $3",
+        [ad, price, id]
       );
   
       res.json("Ad was updated!");

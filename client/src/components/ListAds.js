@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import s from './Style.module.css';
 
 const Adver = (props) => {
     return (
@@ -6,7 +7,6 @@ const Adver = (props) => {
             <div>{props.id}</div>
             <div>{props.ad}</div>
             <div>{props.price}</div>
-            <div>{props.hot}</div>
         </>
     )
 };
@@ -15,17 +15,15 @@ const OneAdver = (props) => {
     let id = props.articles.map( ad => <Adver id={ad.id} key={ad.id} />);
     let ad = props.articles.map( ad => <Adver ad={ad.ad} key={ad.id} />);
     let price = props.articles.map( ad => <Adver price={ad.price} key={ad.id} />);
-    let hot = props.articles.map( ad => <Adver hot={ad.hot} key={ad.id} />);
 
     return (
-        <div>
+        <div className={s.content}>
              <table>
                 <thead>
                     <tr>
                         <th>Id</th>
                         <th>Ad</th>
                         <th>Price</th>
-                        <th>Hot Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,7 +31,6 @@ const OneAdver = (props) => {
                              <td>{id}</td>
                             <td>{ad}</td>
                             <td>{price}</td>
-                            <td>{hot}</td>
                         </tr>
                     
                 </tbody>
@@ -64,7 +61,6 @@ const ListAds = () => {
 
     return (
         <>
-           
             <OneAdver articles={articles} />
         </>
     )

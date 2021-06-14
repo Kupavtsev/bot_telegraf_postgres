@@ -1,28 +1,26 @@
 const TelegramApi = require('node-telegram-bot-api')
 const {priceOptions, hotPriceOptions } = require('./options')
 
+
 const sequelize = require('./db')
-// const UserModel = require('./model')
 const PriceModel = require('./model')
 
-const token = '1835665140:AAGps0TPKOKDNOcj_U9tz3TFdaj6UI-7TDU'
 
+const token = '1835665140:AAGps0TPKOKDNOcj_U9tz3TFdaj6UI-7TDU'
 const bot = new TelegramApi(token, {polling: true})
 
 
-const choosePrice = async (chatId) => {
-    await bot.sendMessage(chatId, 'Укажите цену:', priceOptions)
-}
+// Main logic
 
-function isEmpty(obj) {
-    return Object.keys(obj).length === 0;
+const choosePrice = async (chatId) => {             // Table of prices
+    await bot.sendMessage(chatId, 'Укажите цену:', priceOptions)
 }
 
 
 const start = async () => {
 
     try {
-        await sequelize.authenticate()
+        await sequelize.authenticate()              // Base conection
         await sequelize.sync()
     } catch (e) {
         console.log('Base connection has lost!')
@@ -36,14 +34,11 @@ const start = async () => {
         const text = msg.text;
         const chatId = msg.chat.id;
         const user = await PriceModel.findOne({chatId})
-        // console.log(isEmpty(user));
 
         try {
             if (text === '/start') {
 
-                // if (isEmpty(user)) {
-                //     await PriceModel.create({chatId}) 
-                // }
+                
                 await PriceModel.create({chatId})
 
                 return bot.sendMessage(chatId, `Добро пожаловать, напишите ваше объявление: `);
@@ -51,13 +46,13 @@ const start = async () => {
             if (text) {
                 user.ad = text;
                 await user.save();
-                console.log(text);
+                // console.log(text);
                 return choosePrice(chatId);
             }
             
             return bot.sendMessage(chatId, 'Я тебе не понимаю, напиши по другому...')
         } catch (e) {
-            return bot.sendMessage(chatId, 'Произошла какая-то ошибка');
+            return bot.sendMessage(chatId, 'Повторный вход. Обновите объявление:');
         }
     })
 

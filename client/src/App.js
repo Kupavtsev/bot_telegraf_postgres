@@ -1,12 +1,14 @@
-import './App.css';
-import ListAds from './components/ListAds';
+import './App.css'
+import Timer from './components/Timer'
 
 function App() {
   return (
     <div className="App">
-      <ListAds />
+      <div >
+        <Timer />
+      </div>
     </div>
   );
 }
 
-export default App;
+export default App
